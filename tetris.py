@@ -206,25 +206,22 @@ def avanzar(juego, siguiente_pieza):
         #Llena los lugares correspondientes
         for bloque in piezaActual:
             #( (0, 14), (0, 15), (0, 16), (0, 17) )
-            grilla[bloque[1]] [bloque[0]] = bloque
+            grilla[bloque[1]][bloque[0]] = bloque
+
+        #Borra lineas completadas
+        for y in range(ALTO_JUEGO):
+            for x in range(ANCHO_JUEGO):
+                if(not hay_superficie(juego, x, ALTO_JUEGO - 1 - y)):
+                    break
+                
+                if(x == 8):
+                    filaVacia = [() for x in range(ANCHO_JUEGO)]
+                    grilla[ALTO_JUEGO - 1 - y] = filaVacia
 
         juego_nuevo = {
             'pieza_actual': siguiente_pieza,
             'grilla': grilla
         }
-
-        #Borra lineas completadas
-        for y in range(ALTO_JUEGO):
-            for x in range(ANCHO_JUEGO):
-                if(not hay_superficie(juego_nuevo, x, ALTO_JUEGO - 1 - y)):
-                    break
-                
-                if(x == 8):
-                    filaVacia = []
-                    for i in range(ANCHO_JUEGO):
-                        filaVacia.append( () )
-                    juego_nuevo['grilla'][ALTO_JUEGO - 1 - y] = filaVacia
-
     else:
         juego_nuevo = {
         'pieza_actual': trasladar_pieza(piezaActual, 0, 1),
@@ -233,7 +230,7 @@ def avanzar(juego, siguiente_pieza):
     
     
 
-    return [juego_nuevo, cambiar_pieza]
+    return (juego_nuevo, cambiar_pieza)
 
 def terminado(juego):
 
