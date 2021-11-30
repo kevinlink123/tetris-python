@@ -145,7 +145,7 @@ def mover(juego, direccion):
         #Chequea si sobrepasa el ancho de la grilla del juego
         if(bloque[0] + direccion < 0 ):
             return juego
-        elif(bloque[0] + direccion > ANCHO_JUEGO):
+        elif(bloque[0] + direccion >= ANCHO_JUEGO - 1):
             return juego
         
         #Chequea si tiene bloques adyacentes
