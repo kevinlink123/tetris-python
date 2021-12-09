@@ -34,10 +34,9 @@ def generar_pieza(pieza=None):
 
     #Retorna la pieza indicada si se especifica
     if(pieza):
-        nuevaPieza = list(PIEZAS[pieza])        
+        nuevaPieza = list(PIEZAS[pieza])
         return tuple(nuevaPieza)
 
-    
     piezaAleatoria = randint(0, len(PIEZAS))
     nuevaPieza = list(PIEZAS[piezaAleatoria])
     return tuple(nuevaPieza)
@@ -54,10 +53,11 @@ def trasladar_pieza(pieza, dx, dy):
     """
     #Lista mutable
     bloqueTransladado = []
-    #( (0, 0), (1, 0), (2, 0), (1, 1) ) T
-
-    #( (0, 0), (0, 1), (0, 2), (1, 2) ) L
     for bloque in pieza:
+        if(not bloque):
+            bloqueTransladado.append(bloque)
+            continue
+
         if(bloque[0] + dx > ANCHO_JUEGO or bloque[1] + dy > ALTO_JUEGO):
             return pieza
 
@@ -69,6 +69,7 @@ def trasladar_pieza(pieza, dx, dy):
     #Nueva tupla inmutable con nuevas cordenadas
     piezaTransladada = tuple(bloqueTransladado)
     return piezaTransladada
+
 
 def crear_juego(pieza_inicial):
     """
@@ -88,7 +89,7 @@ def crear_juego(pieza_inicial):
 
     juego = {
         'grilla': [ [() for x in range(ANCHO_JUEGO)] for x in range(ALTO_JUEGO) ],
-        'pieza_actual': pieza_inicial
+        'pieza_actual': trasladar_pieza(pieza_inicial, ANCHO_JUEGO // 2, 0)
     }
 
     return juego
@@ -145,14 +146,15 @@ def mover(juego, direccion):
         #Chequea si sobrepasa el ancho de la grilla del juego
         if(bloque[0] + direccion < 0 ):
             return juego
-        elif(bloque[0] + direccion >= ANCHO_JUEGO - 1):
+        
+        if(bloque[0] + direccion > 8):
             return juego
         
         #Chequea si tiene bloques adyacentes
         if(hay_superficie(juego, bloque[0] + direccion, bloque[1])):
             return juego
         
-        juego['pieza_actual'] = trasladar_pieza(piezaActual, direccion, 0)
+    juego['pieza_actual'] = trasladar_pieza(piezaActual, direccion, 0)
     return juego
 
 def avanzar(juego, siguiente_pieza):
@@ -211,15 +213,26 @@ def avanzar(juego, siguiente_pieza):
         #Borra lineas completadas
         for y in range(ALTO_JUEGO):
             for x in range(ANCHO_JUEGO):
-                if(not hay_superficie(juego, x, ALTO_JUEGO - 1 - y)):
+                if(not hay_superficie(juego, x, y)):
                     break
                 
                 if(x == 8):
                     filaVacia = [() for x in range(ANCHO_JUEGO)]
-                    grilla[ALTO_JUEGO - 1 - y] = filaVacia
+                    grilla[y] = filaVacia
 
+                    #Una vez borradas una fila, las filas por encima de la misma deben descender 1 unidad
+                    for i in range(y):
+                        #primero se toma la fila a mover como una pieza completa y se la traslada 1 unidad en el eje Y
+                        filaMovida = trasladar_pieza(grilla[y - i - 1], 0, 1)
+                        #Luego se guarda dicha fila trasladada en su lugar en la grilla
+                        
+                        #Notese que se convierte la "filaMovida" en una lista, ya que la funcion "trasladar_pieza" devuelve una
+                        #tupla pero las filas estan representadas como listas de tuplas.
+                        grilla[y - i] = list(filaMovida)
+
+        # Devuelve el nuevo estado del juego con la grilla actualizada y la pieza centrada
         juego_nuevo = {
-            'pieza_actual': siguiente_pieza,
+            'pieza_actual': trasladar_pieza(siguiente_pieza, ANCHO_JUEGO // 2, 0),
             'grilla': grilla
         }
     else:
